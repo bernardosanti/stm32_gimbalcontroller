@@ -1,0 +1,7 @@
+../Core/Src/CircBuffer.cpp:10:1:CircBuffer::CircBuffer()	16	static
+../Core/Src/CircBuffer.cpp:15:1:CircBuffer::~CircBuffer()	16	static
+../Core/Src/CircBuffer.cpp:15:1:virtual CircBuffer::~CircBuffer()	16	static
+../Core/Src/CircBuffer.cpp:20:6:void CircBuffer::Read(uint8_t*, size_t)	32	static
+../Core/Src/CircBuffer.cpp:33:6:void CircBuffer::Write(uint8_t*, size_t)	32	static
+../Core/Src/CircBuffer.cpp:43:6:void CircBuffer::Peak(uint8_t*, size_t)	32	static
+../Core/Src/CircBuffer.cpp:53:8:size_t CircBuffer::Available()	16	static
