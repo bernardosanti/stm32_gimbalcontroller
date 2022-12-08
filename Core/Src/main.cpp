@@ -39,11 +39,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
-DMA_HandleTypeDef hdma_i2c1_rx;
-DMA_HandleTypeDef hdma_i2c1_tx;
 
 TIM_HandleTypeDef htim1;
-TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim7;
 
@@ -62,7 +59,6 @@ static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM1_Init(void);
-static void MX_TIM5_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
 
@@ -106,13 +102,25 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_TIM1_Init();
-  MX_TIM5_Init();
   MX_TIM6_Init();
   MX_TIM7_Init();
 
   /* USER CODE BEGIN 2 */
   uart2.AssignUart(&huart2);
 
+  HAL_Delay(1000);
+  MPU9050 imu(0x68, &hi2c1);
+
+  if(imu.Init() != 1)
+  {
+	  std::string error_msg("IMU init error.\n");
+	  uart2.Send((uint8_t*) error_msg.c_str(), error_msg.size());
+  }
+  else
+  {
+	  std::string succeed_msg("IMU init succeeded.");
+	  uart2.Send((uint8_t*) succeed_msg.c_str(), succeed_msg.size());
+  }
   // USE TIMER 6 FOR 10Khz TASKS, SUCH AS STABILIZATION
 
   // USE TIMER 7 FOR 100Hz TASKS, SUCH AS I2C COMMS (ENCODER AND IMU)
@@ -122,7 +130,35 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  /*uint8_t Buffer[25] = {0};
+  uint8_t Space[] = " - ";
+  uint8_t StartMSG[] = "Starting I2C Scanning: \r\n";
+  uint8_t EndMSG[] = "Done! \r\n\r\n";
+  uint8_t i, ret = 0;
+  HAL_Delay(1000);*/
+
+      /*-[ I2C Bus Scanning ]-*/
+      /* HAL_UART_Transmit(&huart2, StartMSG, sizeof(StartMSG), 10000);
+      for(i=1; i<128; i++)
+      {
+      	ret = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(i<<1), 3, 5);
+          if (ret != HAL_OK)
+          {
+              HAL_UART_Transmit(&huart2, Space, sizeof(Space), 10000);
+          }
+          else if(ret == HAL_OK)
+          {
+              sprintf((char*)Buffer, "0x%X", i);
+              HAL_UART_Transmit(&huart2, Buffer, sizeof(Buffer), 10000);
+          }
+      }
+      HAL_UART_Transmit(&huart2, EndMSG, sizeof(EndMSG), 10000); */
+
+
   uint32_t prevTime = HAL_GetTick();
+  uint32_t prevTime_imu = HAL_GetTick();
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -141,6 +177,18 @@ int main(void)
 		  std::string periodic_msg = "This is a periodic 5s message.\n";
 		  uart2.Send((uint8_t*)periodic_msg.c_str(), periodic_msg.size());
 		  prevTime = HAL_GetTick();
+	  }
+
+	  if(HAL_GetTick() - prevTime_imu > 1000)
+	  {
+		  std::string periodic_acc_msg = "IMU data: ";
+		  uart2.Send((uint8_t*)periodic_acc_msg.c_str(), periodic_acc_msg.size());
+
+		  float Ax, Ay, Az;
+		  imu.ReadAccel(Ax, Ay, Az);
+		  std::string acc_msg = "X " + std::to_string(Ax) + " | Y " + std::to_string(Ay) + " | Az " + std::to_string(Az) + "\n";
+		  uart2.Send((uint8_t*)acc_msg.c_str(), acc_msg.size());
+		  prevTime_imu = HAL_GetTick();
 	  }
   }
   /* USER CODE END 3 */
@@ -178,7 +226,6 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef* hi2c)
 {
 	// From which slave
-	// Roll Encoder
 	switch(hi2c->Devaddress)
 	{
 		case 0x40:
@@ -190,6 +237,8 @@ void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef* hi2c)
 		case 0x42:
 			//do yaw encoder
 			break;
+		case 0x43:
+			// -_O_-
 		case 0x68:
 			//do main imu
 			break;
@@ -365,73 +414,6 @@ static void MX_TIM1_Init(void)
 }
 
 /**
-  * @brief TIM5 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM5_Init(void)
-{
-
-  /* USER CODE BEGIN TIM5_Init 0 */
-
-  /* USER CODE END TIM5_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-
-  /* USER CODE BEGIN TIM5_Init 1 */
-
-  /* USER CODE END TIM5_Init 1 */
-  htim5.Instance = TIM5;
-  htim5.Init.Prescaler = 0;
-  htim5.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED1;
-  htim5.Init.Period = 7637-1;
-  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_Init(&htim5) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM5_Init 2 */
-
-  /* USER CODE END TIM5_Init 2 */
-  HAL_TIM_MspPostInit(&htim5);
-
-}
-
-/**
   * @brief TIM6 Initialization Function
   * @param None
   * @retval None
@@ -513,22 +495,16 @@ static void MX_TIM7_Init(void)
 static void MX_DMA_Init(void)
 {
 
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
+	  /* DMA controller clock enable */
+	  __HAL_RCC_DMA1_CLK_ENABLE();
 
-  /* DMA interrupt init */
-  /* DMA1_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-  /* DMA1_Stream5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
-  /* DMA1_Stream6_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
-  /* DMA1_Stream7_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream7_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream7_IRQn);
+	  /* DMA interrupt init */
+	  /* DMA1_Stream5_IRQn interrupt configuration */
+	  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+	  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+	  /* DMA1_Stream6_IRQn interrupt configuration */
+	  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+	  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 
 }
 

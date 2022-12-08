@@ -76,7 +76,7 @@ main-build: CircularBuffer_Test.elf secondary-outputs
 
 # Tool invocations
 CircularBuffer_Test.elf CircularBuffer_Test.map: $(OBJS) $(USER_OBJS) /Users/bernardosantana/Desktop/dev/stm32/CircularBuffer_Test/STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "CircularBuffer_Test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/bernardosantana/Desktop/dev/stm32/CircularBuffer_Test/STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CircularBuffer_Test.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+	arm-none-eabi-g++ -o "CircularBuffer_Test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/bernardosantana/Desktop/dev/stm32/CircularBuffer_Test/STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CircularBuffer_Test.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
