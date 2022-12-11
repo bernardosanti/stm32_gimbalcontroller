@@ -23,6 +23,8 @@
 #define __MAIN_H
 
 #include <string>
+#include <iomanip>
+#include <sstream>
 
 #ifdef __cplusplus
 extern "C" {

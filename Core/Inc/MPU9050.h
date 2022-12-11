@@ -373,7 +373,7 @@ extern "C" {
 
 // note: DMP code memory blocks defined at end of header file
 
-#define TIMEOUT 10000
+#define TIMEOUT 100
 
 class MPU9050 {
     public:
@@ -385,8 +385,8 @@ class MPU9050 {
 
 		int Init();
         int ReadAccel(float& Ax, float& Ay, float& Az);
-        int ReadGyro(float* Gx, float* Gy, float* Gz);
-        int ReadAccelGyro(float* Ax, float* Ay, float* Az, float* Gx, float* Gy, float* Gz);
+        int ReadGyro(float& Gx, float& Gy, float& Gz);
+        int ReadAccelGyro(float& Ax, float& Ay, float& Az, float& Gx, float& Gy, float& Gz);
 
 
     private:

@@ -118,7 +118,7 @@ int main(void)
   }
   else
   {
-	  std::string succeed_msg("IMU init succeeded.");
+	  std::string succeed_msg("IMU init succeeded.\n");
 	  uart2.Send((uint8_t*) succeed_msg.c_str(), succeed_msg.size());
   }
   // USE TIMER 6 FOR 10Khz TASKS, SUCH AS STABILIZATION
@@ -130,31 +130,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-  /*uint8_t Buffer[25] = {0};
-  uint8_t Space[] = " - ";
-  uint8_t StartMSG[] = "Starting I2C Scanning: \r\n";
-  uint8_t EndMSG[] = "Done! \r\n\r\n";
-  uint8_t i, ret = 0;
-  HAL_Delay(1000);*/
-
-      /*-[ I2C Bus Scanning ]-*/
-      /* HAL_UART_Transmit(&huart2, StartMSG, sizeof(StartMSG), 10000);
-      for(i=1; i<128; i++)
-      {
-      	ret = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(i<<1), 3, 5);
-          if (ret != HAL_OK)
-          {
-              HAL_UART_Transmit(&huart2, Space, sizeof(Space), 10000);
-          }
-          else if(ret == HAL_OK)
-          {
-              sprintf((char*)Buffer, "0x%X", i);
-              HAL_UART_Transmit(&huart2, Buffer, sizeof(Buffer), 10000);
-          }
-      }
-      HAL_UART_Transmit(&huart2, EndMSG, sizeof(EndMSG), 10000); */
-
 
   uint32_t prevTime = HAL_GetTick();
   uint32_t prevTime_imu = HAL_GetTick();
@@ -172,22 +147,32 @@ int main(void)
 		  HAL_Delay(1);
 	  }
 
-	  if(HAL_GetTick() - prevTime > 5000)
+	  if(HAL_GetTick() - prevTime > 100000)
 	  {
-		  std::string periodic_msg = "This is a periodic 5s message.\n";
+		  std::string periodic_msg = "This is a periodic 100s message.\n";
 		  uart2.Send((uint8_t*)periodic_msg.c_str(), periodic_msg.size());
 		  prevTime = HAL_GetTick();
 	  }
 
-	  if(HAL_GetTick() - prevTime_imu > 1000)
+	  if(HAL_GetTick() - prevTime_imu > 100)
 	  {
-		  std::string periodic_acc_msg = "IMU data: ";
-		  uart2.Send((uint8_t*)periodic_acc_msg.c_str(), periodic_acc_msg.size());
+		  std::string periodic_imu_msg = "IMU data\n";
+		  uart2.Send((uint8_t*)periodic_imu_msg.c_str(), periodic_imu_msg.size());
 
-		  float Ax, Ay, Az;
-		  imu.ReadAccel(Ax, Ay, Az);
-		  std::string acc_msg = "X " + std::to_string(Ax) + " | Y " + std::to_string(Ay) + " | Az " + std::to_string(Az) + "\n";
-		  uart2.Send((uint8_t*)acc_msg.c_str(), acc_msg.size());
+		  float Ax, Ay, Az, Gx, Gy, Gz = 0;
+		  imu.ReadAccelGyro(Ax, Ay, Az, Gx, Gy, Gz);
+
+		  std::stringstream acc_msg;
+		  acc_msg << std::fixed << std::setprecision(3);
+		  acc_msg << "X " << Ax << " | Y " << Ay << " | Z " << Az << "\n";
+		  uart2.Send((uint8_t*)acc_msg.str().c_str(), acc_msg.str().size());
+
+		  HAL_Delay(10);
+
+		  std::stringstream gyro_msg;
+		  gyro_msg << std::fixed << std::setprecision(3);
+		  gyro_msg << "X " << Gx << " | Y " << Gy << " | Z " << Gz << "\n";
+		  uart2.Send((uint8_t*)gyro_msg.str().c_str(), gyro_msg.str().size());
 		  prevTime_imu = HAL_GetTick();
 	  }
   }
