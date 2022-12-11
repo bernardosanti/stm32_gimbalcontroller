@@ -26,7 +26,7 @@ int MPU9050::Init()
 
 	HAL_I2C_Mem_Read(hi2c, devAddr, RA_WHO_AM_I, 1, &check, 1 , TIMEOUT);
 
-	if(check == devAddr)
+	if(check == _devAddr)
 	{
 		//Power management register write all 0's to wake up sensor
 		data = 0;
@@ -69,9 +69,9 @@ int MPU9050::ReadAccel(float &Ax, float &Ay, float &Az)
 	ay = (int16_t)(buf[2] << 8 | buf[3]);
 	az = (int16_t)(buf[4] << 8 | buf[5]);
 
-	Ax = ax*9.81/16384.0;
-	Ay = ay*9.81/16384.0;
-	Az = az*9.81/16384.0;
+	Ax = (float)ax*9.81/16384.0;
+	Ay = (float)ay*9.81/16384.0;
+	Az = (float)az*9.81/16384.0;
 
 	return 1;
 }
@@ -90,9 +90,9 @@ int MPU9050::ReadGyro(float& Gx, float& Gy, float& Gz)
 	gy = (int16_t)(buf[2] << 8 | buf[3]);
 	gz = (int16_t)(buf[4] << 8 | buf[5]);
 
-	Gx = gx/131.0;
-	Gy = gy/131.0;
-	Gz = gz/131.0;
+	Gx = (float)gx/131.0;
+	Gy = (float)gy/131.0;
+	Gz = (float)gz/131.0;
 
 	return 1;
 }
@@ -112,17 +112,17 @@ int MPU9050::ReadAccelGyro(float& Ax, float& Ay, float& Az, float& Gx, float& Gy
 	ay = (int16_t)(buf[2] << 8 | buf [3]);
 	az = (int16_t)(buf[4] << 8 | buf [5]);
 
-	Ax = ax*9.81/16384.0;
-	Ay = ay*9.81/16384.0;
-	Az = az*9.81/16384.0;
+	Ax = (float)ax*9.81/16384.0;
+	Ay = (float)ay*9.81/16384.0;
+	Az = (float)az*9.81/16384.0;
 
 	gx = (int16_t)(buf[8] << 8 | buf [9]);
 	gy = (int16_t)(buf[10] << 8 | buf [11]);
 	gz = (int16_t)(buf[12] << 8 | buf [13]);
 
-	Gx = gx/131.0;
-	Gy = gy/131.0;
-	Gz = gz/131.0;
+	Gx = (float)gx/131.0;
+	Gy = (float)gy/131.0;
+	Gz = (float)gz/131.0;
 
 	return 1;
 }

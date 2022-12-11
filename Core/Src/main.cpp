@@ -110,6 +110,7 @@ int main(void)
 
   HAL_Delay(1000);
   MPU9050 imu(0x68, &hi2c1);
+  AS5048B encoder(0x43, &hi2c1);
 
   if(imu.Init() != 1)
   {
@@ -119,6 +120,18 @@ int main(void)
   else
   {
 	  std::string succeed_msg("IMU init succeeded.\n");
+	  uart2.Send((uint8_t*) succeed_msg.c_str(), succeed_msg.size());
+  }
+
+  HAL_Delay(10);
+  if(encoder.Init() != 1)
+  {
+	  std::string error_msg("Encoder init error.\n");
+	  uart2.Send((uint8_t*) error_msg.c_str(), error_msg.size());
+  }
+  else
+  {
+	  std::string succeed_msg("Encoder init succeeded.\n");
 	  uart2.Send((uint8_t*) succeed_msg.c_str(), succeed_msg.size());
   }
   // USE TIMER 6 FOR 10Khz TASKS, SUCH AS STABILIZATION
@@ -133,6 +146,7 @@ int main(void)
 
   uint32_t prevTime = HAL_GetTick();
   uint32_t prevTime_imu = HAL_GetTick();
+  uint32_t prevTime_enc = HAL_GetTick();
 
   while (1)
   {
@@ -154,13 +168,15 @@ int main(void)
 		  prevTime = HAL_GetTick();
 	  }
 
-	  if(HAL_GetTick() - prevTime_imu > 100)
+	  if(HAL_GetTick() - prevTime_imu > 10000)
 	  {
 		  std::string periodic_imu_msg = "IMU data\n";
 		  uart2.Send((uint8_t*)periodic_imu_msg.c_str(), periodic_imu_msg.size());
 
 		  float Ax, Ay, Az, Gx, Gy, Gz = 0;
 		  imu.ReadAccelGyro(Ax, Ay, Az, Gx, Gy, Gz);
+
+		  HAL_Delay(10);
 
 		  std::stringstream acc_msg;
 		  acc_msg << std::fixed << std::setprecision(3);
@@ -174,6 +190,23 @@ int main(void)
 		  gyro_msg << "X " << Gx << " | Y " << Gy << " | Z " << Gz << "\n";
 		  uart2.Send((uint8_t*)gyro_msg.str().c_str(), gyro_msg.str().size());
 		  prevTime_imu = HAL_GetTick();
+	  }
+
+	  if(HAL_GetTick() - prevTime_enc > 250)
+	  {
+		  std::string periodic_imu_msg = "Encoder data\n";
+		  uart2.Send((uint8_t*)periodic_imu_msg.c_str(), periodic_imu_msg.size());
+
+		  int16_t encoderAngle = 0;
+		  encoder.GetEncoderAngle(encoderAngle);
+
+		  HAL_Delay(10);
+		  std::stringstream enc_msg;
+		  enc_msg << std::fixed << std::setprecision(3);
+		  enc_msg << encoderAngle <<"\n";
+		  uart2.Send((uint8_t*)enc_msg.str().c_str(), enc_msg.str().size());
+
+		  prevTime_enc = HAL_GetTick();
 	  }
   }
   /* USER CODE END 3 */

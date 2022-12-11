@@ -38,6 +38,7 @@ extern "C" {
 #include "CircBuffer.h"
 #include "serialPort.h"
 #include "MPU9050.h"
+#include "AS5048B.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

@@ -1,3 +1,4 @@
+"./Core/Src/AS5048B.o"
 "./Core/Src/BLDCMotor.o"
 "./Core/Src/CircBuffer.o"
 "./Core/Src/MPU9050.o"
