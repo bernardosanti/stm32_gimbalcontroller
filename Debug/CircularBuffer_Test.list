@@ -1503,7 +1503,7 @@ int AS5048B::GetEncoderAngle(float& encAngle)
  8001104:	2300      	movs	r3, #0
  8001106:	e01d      	b.n	8001144 <_ZN7AS5048B15GetEncoderAngleERf+0x7c>
 
-	uint16_t raw_encAngle = (int16_t)(buf[0] << 6 | (buf[1] & 0x3F));
+	uint16_t raw_encAngle = ((int16_t)buf[0] << 6 | (buf[1] & 0x3F));
  8001108:	7b3b      	ldrb	r3, [r7, #12]
  800110a:	019b      	lsls	r3, r3, #6
  800110c:	b21a      	sxth	r2, r3
@@ -2010,7 +2010,7 @@ int MPU9050::ReadAccelGyro(float& Ax, float& Ay, float& Az, float& Gx, float& Gy
  8001456:	e0b6      	b.n	80015c6 <_ZN7MPU905013ReadAccelGyroERfS0_S0_S0_S0_S0_+0x1be>
 	}
 
-	ax = (int16_t)(buf[0] << 8 | buf [1]);
+	ax = ((int16_t)buf[0] << 8 | buf [1]);
  8001458:	7d3b      	ldrb	r3, [r7, #20]
  800145a:	021b      	lsls	r3, r3, #8
  800145c:	b21a      	sxth	r2, r3
@@ -2018,7 +2018,7 @@ int MPU9050::ReadAccelGyro(float& Ax, float& Ay, float& Az, float& Gx, float& Gy
  8001460:	b21b      	sxth	r3, r3
  8001462:	4313      	orrs	r3, r2
  8001464:	85bb      	strh	r3, [r7, #44]	; 0x2c
-	ay = (int16_t)(buf[2] << 8 | buf [3]);
+	ay = ((int16_t)buf[2] << 8 | buf [3]);
  8001466:	7dbb      	ldrb	r3, [r7, #22]
  8001468:	021b      	lsls	r3, r3, #8
  800146a:	b21a      	sxth	r2, r3
@@ -2026,7 +2026,7 @@ int MPU9050::ReadAccelGyro(float& Ax, float& Ay, float& Az, float& Gx, float& Gy
  800146e:	b21b      	sxth	r3, r3
  8001470:	4313      	orrs	r3, r2
  8001472:	857b      	strh	r3, [r7, #42]	; 0x2a
-	az = (int16_t)(buf[4] << 8 | buf [5]);
+	az = ((int16_t)buf[4] << 8 | buf [5]);
  8001474:	7e3b      	ldrb	r3, [r7, #24]
  8001476:	021b      	lsls	r3, r3, #8
  8001478:	b21a      	sxth	r2, r3
@@ -2108,7 +2108,7 @@ int MPU9050::ReadAccelGyro(float& Ax, float& Ay, float& Az, float& Gx, float& Gy
  8001544:	683b      	ldr	r3, [r7, #0]
  8001546:	601a      	str	r2, [r3, #0]
 
-	gx = (int16_t)(buf[8] << 8 | buf [9]);
+	gx = ((int16_t)buf[8] << 8 | buf [9]);
  8001548:	7f3b      	ldrb	r3, [r7, #28]
  800154a:	021b      	lsls	r3, r3, #8
  800154c:	b21a      	sxth	r2, r3
@@ -2116,7 +2116,7 @@ int MPU9050::ReadAccelGyro(float& Ax, float& Ay, float& Az, float& Gx, float& Gy
  8001550:	b21b      	sxth	r3, r3
  8001552:	4313      	orrs	r3, r2
  8001554:	84fb      	strh	r3, [r7, #38]	; 0x26
-	gy = (int16_t)(buf[10] << 8 | buf [11]);
+	gy = ((int16_t)buf[10] << 8 | buf [11]);
  8001556:	7fbb      	ldrb	r3, [r7, #30]
  8001558:	021b      	lsls	r3, r3, #8
  800155a:	b21a      	sxth	r2, r3
@@ -2124,7 +2124,7 @@ int MPU9050::ReadAccelGyro(float& Ax, float& Ay, float& Az, float& Gx, float& Gy
  800155e:	b21b      	sxth	r3, r3
  8001560:	4313      	orrs	r3, r2
  8001562:	84bb      	strh	r3, [r7, #36]	; 0x24
-	gz = (int16_t)(buf[12] << 8 | buf [13]);
+	gz = ((int16_t)buf[12] << 8 | buf [13]);
  8001564:	f897 3020 	ldrb.w	r3, [r7, #32]
  8001568:	021b      	lsls	r3, r3, #8
  800156a:	b21a      	sxth	r2, r3

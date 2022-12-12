@@ -44,7 +44,7 @@ int AS5048B::GetEncoderAngle(float& encAngle)
 	if(HAL_I2C_Mem_Read(hi2c, devAddr, RA_ANGLE_ENC, 1, buf, 2 , TIMEOUT_ENC) != HAL_OK)
 		return 0;
 
-	uint16_t raw_encAngle = (int16_t)(buf[0] << 6 | (buf[1] & 0x3F));
+	uint16_t raw_encAngle = ((int16_t)buf[0] << 6 | (buf[1] & 0x3F));
 	encAngle = raw_encAngle * AS5048B_RESOLUTION;
 
 	return 1;

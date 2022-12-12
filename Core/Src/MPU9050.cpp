@@ -65,9 +65,9 @@ int MPU9050::ReadAccel(float &Ax, float &Ay, float &Az)
 	}
 
 	//Adding 2 BYTES into 16 bit integer
-	ax = (int16_t)(buf[0] << 8 | buf[1]);
-	ay = (int16_t)(buf[2] << 8 | buf[3]);
-	az = (int16_t)(buf[4] << 8 | buf[5]);
+	ax = ((int16_t)buf[0] << 8 | buf[1]);
+	ay = ((int16_t)buf[2] << 8 | buf[3]);
+	az = ((int16_t)buf[4] << 8 | buf[5]);
 
 	Ax = (float)ax*9.81/16384.0;
 	Ay = (float)ay*9.81/16384.0;
@@ -86,9 +86,9 @@ int MPU9050::ReadGyro(float& Gx, float& Gy, float& Gz)
 		return 0;
 	}
 
-	gx = (int16_t)(buf[0] << 8 | buf[1]);
-	gy = (int16_t)(buf[2] << 8 | buf[3]);
-	gz = (int16_t)(buf[4] << 8 | buf[5]);
+	gx = ((int16_t)buf[0] << 8 | buf[1]);
+	gy = ((int16_t)buf[2] << 8 | buf[3]);
+	gz = ((int16_t)buf[4] << 8 | buf[5]);
 
 	Gx = (float)gx/131.0;
 	Gy = (float)gy/131.0;
@@ -108,17 +108,17 @@ int MPU9050::ReadAccelGyro(float& Ax, float& Ay, float& Az, float& Gx, float& Gy
 		return 0;
 	}
 
-	ax = (int16_t)(buf[0] << 8 | buf [1]);
-	ay = (int16_t)(buf[2] << 8 | buf [3]);
-	az = (int16_t)(buf[4] << 8 | buf [5]);
+	ax = ((int16_t)buf[0] << 8 | buf [1]);
+	ay = ((int16_t)buf[2] << 8 | buf [3]);
+	az = ((int16_t)buf[4] << 8 | buf [5]);
 
 	Ax = (float)ax*9.81/16384.0;
 	Ay = (float)ay*9.81/16384.0;
 	Az = (float)az*9.81/16384.0;
 
-	gx = (int16_t)(buf[8] << 8 | buf [9]);
-	gy = (int16_t)(buf[10] << 8 | buf [11]);
-	gz = (int16_t)(buf[12] << 8 | buf [13]);
+	gx = ((int16_t)buf[8] << 8 | buf [9]);
+	gy = ((int16_t)buf[10] << 8 | buf [11]);
+	gz = ((int16_t)buf[12] << 8 | buf [13]);
 
 	Gx = (float)gx/131.0;
 	Gy = (float)gy/131.0;
