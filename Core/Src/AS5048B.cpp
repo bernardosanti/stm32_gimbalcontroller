@@ -26,24 +26,26 @@ AS5048B::~AS5048B() {
 
 int AS5048B::Init()
 {
-	uint8_t check;
+	//uint8_t check;
 
 	if(HAL_I2C_IsDeviceReady(hi2c, devAddr, 5, TIMEOUT_ENC) != HAL_OK)
 		return 0;
 
-	HAL_I2C_Mem_Read(hi2c, devAddr, RA_WHO_AM_I_ENC, 1, &check, 1 , TIMEOUT_ENC);
+	/*HAL_I2C_Mem_Read(hi2c, devAddr, RA_WHO_AM_I_ENC, 1, &check, 1 , TIMEOUT_ENC);
 	if(check != _devAddr)
-		return 0;
+		return 0;*/
 
 	return 1;
 }
 
-int AS5048B::GetEncoderAngle(int16_t& encAngle)
+int AS5048B::GetEncoderAngle(float& encAngle)
 {
 	uint8_t buf[2] = {0};
 	if(HAL_I2C_Mem_Read(hi2c, devAddr, RA_ANGLE_ENC, 1, buf, 2 , TIMEOUT_ENC) != HAL_OK)
 		return 0;
 
-	encAngle = (int16_t)(buf[1] << 8 | buf[0]);
+	uint16_t raw_encAngle = (int16_t)(buf[0] << 6 | (buf[1] & 0x3F));
+	encAngle = raw_encAngle * AS5048B_RESOLUTION;
+
 	return 1;
 }

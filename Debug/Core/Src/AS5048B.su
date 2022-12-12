@@ -2,5 +2,5 @@
 ../Core/Src/AS5048B.cpp:17:1:AS5048B::AS5048B()	16	static
 ../Core/Src/AS5048B.cpp:22:1:AS5048B::~AS5048B()	16	static
 ../Core/Src/AS5048B.cpp:22:1:virtual AS5048B::~AS5048B()	16	static
-../Core/Src/AS5048B.cpp:27:5:int AS5048B::Init()	40	static
-../Core/Src/AS5048B.cpp:41:5:int AS5048B::GetEncoderAngle(int16_t&)	40	static
+../Core/Src/AS5048B.cpp:27:5:int AS5048B::Init()	16	static
+../Core/Src/AS5048B.cpp:41:5:int AS5048B::GetEncoderAngle(float&)	40	static

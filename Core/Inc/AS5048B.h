@@ -19,6 +19,7 @@ extern "C" {
 #define RA_ANGLE_ENC		0xFE
 
 #define TIMEOUT_ENC 100
+#define AS5048B_RESOLUTION 0.0219
 
 class AS5048B {
 public:
@@ -26,7 +27,7 @@ public:
 	AS5048B();
 	virtual ~AS5048B();
 	int Init();
-	int GetEncoderAngle(int16_t& encAngle);
+	int GetEncoderAngle(float& encAngle);
 
 private:
     uint8_t _devAddr;

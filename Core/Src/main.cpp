@@ -168,7 +168,7 @@ int main(void)
 		  prevTime = HAL_GetTick();
 	  }
 
-	  if(HAL_GetTick() - prevTime_imu > 10000)
+	  if(HAL_GetTick() - prevTime_imu > 100)
 	  {
 		  std::string periodic_imu_msg = "IMU data\n";
 		  uart2.Send((uint8_t*)periodic_imu_msg.c_str(), periodic_imu_msg.size());
@@ -197,7 +197,7 @@ int main(void)
 		  std::string periodic_imu_msg = "Encoder data\n";
 		  uart2.Send((uint8_t*)periodic_imu_msg.c_str(), periodic_imu_msg.size());
 
-		  int16_t encoderAngle = 0;
+		  float encoderAngle = 0;
 		  encoder.GetEncoderAngle(encoderAngle);
 
 		  HAL_Delay(10);
