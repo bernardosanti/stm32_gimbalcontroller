@@ -11,6 +11,7 @@
 class PID {
 public:
 	PID();
+	PID(double P, double I, double D);
 	virtual ~PID();
 	double Calculate(double setPoint, double currentPoint, double dh);
 	void ClearITerm();

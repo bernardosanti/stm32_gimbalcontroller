@@ -24,7 +24,6 @@
 
 #include <string>
 #include <iomanip>
-#include <sstream>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +38,7 @@ extern "C" {
 #include "serialPort.h"
 #include "MPU9050.h"
 #include "AS5048B.h"
+#include "BLDCMotor.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
