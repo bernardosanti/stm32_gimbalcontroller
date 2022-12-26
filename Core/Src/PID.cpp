@@ -7,9 +7,17 @@
 
 #include "PID.h"
 
-PID::PID() {
-	// TODO Auto-generated constructor stub
+PID::PID() : PID(1.0, 0.0, 0.0)
+{
 
+
+}
+
+PID::PID(double _P, double _I, double _D)
+{
+	P = _P;
+	I = _I;
+	D = _D;
 }
 
 PID::~PID() {
