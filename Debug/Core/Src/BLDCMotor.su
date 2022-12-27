@@ -1,11 +1,14 @@
-../Core/Inc/PID.h:11:7:constexpr PID& PID::operator=(const PID&)	16	static
-../Core/Src/BLDCMotor.cpp:10:1:BLDCMotor::BLDCMotor(uint8_t, double, PID, PID)	32	static
-../Core/Src/BLDCMotor.cpp:17:1:BLDCMotor::~BLDCMotor()	16	static
-../Core/Src/BLDCMotor.cpp:17:1:virtual BLDCMotor::~BLDCMotor()	16	static
-../Core/Src/BLDCMotor.cpp:21:5:int BLDCMotor::Init()	16	static
-../Core/Src/BLDCMotor.cpp:26:6:void BLDCMotor::InverseParkTransform(double, double, double, double&, double&)	72	static
-/Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.10.3-2021.10.macos64_1.0.0.202111181127/tools/arm-none-eabi/include/c++/10.3.1/cmath:475:5:constexpr typename __gnu_cxx::__enable_if<std::__is_integer<_Tp>::__value, double>::__type std::sqrt(_Tp) [with _Tp = int]	16	static
-../Core/Src/BLDCMotor.cpp:35:6:void BLDCMotor::InverseClarkTransform(double, double, double&, double&, double&)	64	static
-../Core/Src/BLDCMotor.cpp:45:6:void BLDCMotor::SVMGenerator(double, double, double&, double&, double&)	96	static
-../Core/Src/BLDCMotor.cpp:59:8:double BLDCMotor::Mech2Elec(double)	24	static
-../Core/Src/BLDCMotor.cpp:64:8:double BLDCMotor::CalcElAngleOffset()	24	static
+../Core/Src/BLDCMotor.cpp:10:1:BLDCMotor::BLDCMotor(uint8_t, double, AS5048B*, TIM_HandleTypeDef*)	32	static
+../Core/Src/BLDCMotor.cpp:21:1:BLDCMotor::~BLDCMotor()	16	static
+../Core/Src/BLDCMotor.cpp:21:1:virtual BLDCMotor::~BLDCMotor()	16	static
+../Core/Src/BLDCMotor.cpp:26:5:int BLDCMotor::Init()	16	static
+../Core/Src/BLDCMotor.cpp:31:6:void BLDCMotor::SetIqRef(double)	24	static
+../Core/Src/BLDCMotor.cpp:36:6:void BLDCMotor::InverseParkTransform(double, double, double, double&, double&)	72	static
+../Core/Src/BLDCMotor.cpp:45:6:void BLDCMotor::InverseClarkTransform(double, double, double&, double&, double&)	56	static
+../Core/Src/BLDCMotor.cpp:54:6:void BLDCMotor::SVMGenerator(double, double, double&, double&, double&)	88	static
+../Core/Src/BLDCMotor.cpp:125:6:void BLDCMotor::SetPWM(double, double, double)	72	static
+../Core/Src/BLDCMotor.cpp:142:8:double BLDCMotor::Mech2Elec(double)	24	static
+../Core/Src/BLDCMotor.cpp:147:5:int BLDCMotor::CalcElAngleOffset()	128	static
+../Core/Src/BLDCMotor.cpp:188:8:double BLDCMotor::GetElAngle()	16	static
+../Core/Src/BLDCMotor.cpp:193:6:void BLDCMotor::UpdateElAngle()	24	static
+../Core/Src/BLDCMotor.cpp:200:6:void BLDCMotor::FOCLoop()	64	static

@@ -7,24 +7,30 @@
 
 #include "BLDCMotor.h"
 
-BLDCMotor::BLDCMotor(uint8_t p, double R, PID PPID, PID VPID, AS5048B *_encoder, TIM_HandleTypeDef *_htim) {
+BLDCMotor::BLDCMotor(uint8_t p, double R, AS5048B *_encoder, TIM_HandleTypeDef *_htim)
+{
 	poles = p;
 	phaseResistance = R;
-	PositionPID = PPID;
-	VelocityPID = VPID;
 	encoder = _encoder;
 	htim = _htim;
+	CtlType = BLDCMotor::VOLTAGE;
 
-	SetPWM(10.0, 20.0, 70.0);
+	SetPWM(0.0, 0.0, 0.0);
 }
 
-BLDCMotor::~BLDCMotor() {
+BLDCMotor::~BLDCMotor()
+{
 	// TODO Auto-generated destructor stub
 }
 
 int BLDCMotor::Init()
 {
 	return CalcElAngleOffset();
+}
+
+void BLDCMotor::SetIqRef(double _iqref)
+{
+	IqRef = _iqref;
 }
 
 void BLDCMotor::InverseParkTransform(double elAngle, double direct, double quadrature, double &alpha, double &beta)
@@ -39,11 +45,10 @@ void BLDCMotor::InverseParkTransform(double elAngle, double direct, double quadr
 void BLDCMotor::InverseClarkTransform(double alpha, double beta, double &a, double &b, double &c)
 {
 	double _one_two = alpha * 0.5;
-	double _sqrt3_two = sqrt(3) / 2;
 
 	a = alpha;
-	b = -_one_two + _sqrt3_two;
-	c = -_one_two - _sqrt3_two;
+	b = -_one_two + _SQRT3_2;
+	c = -_one_two - _SQRT3_2;
 }
 
 void BLDCMotor::SVMGenerator(double alpha, double beta, double &pwma, double &pwmb, double &pwmc)
@@ -55,9 +60,9 @@ void BLDCMotor::SVMGenerator(double alpha, double beta, double &pwma, double &pw
 
 	double minmax = (maxVal + minVal) / 2;
 
-	pwma = (a + minmax) * (2 / sqrt(3));
-	pwmb = (b + minmax) * (2 / sqrt(3));
-	pwmc = (c + minmax) * (2 / sqrt(3));
+	pwma = (a + minmax) * _2_SQRT3;
+	pwmb = (b + minmax) * _2_SQRT3;
+	pwmc = (c + minmax) * _2_SQRT3;
 
 	//SVPWM algorithm
 	// 1. Determine which sector the motor is on
@@ -67,11 +72,11 @@ void BLDCMotor::SVMGenerator(double alpha, double beta, double &pwma, double &pw
 	//double Uout = sqrt(pow(alpha,2) + pow(beta,2));
 
     // 3. Calculate the duty cycles
-    //double T1 = _SQRT3 * sin(sector * _PI_3 - elAngle) * Uout;
-    //double T2 = _SQRT3 * sin(elAngle - (sector-1.0) * _PI_3) * Uout;
-    //double T0 = 1 - T1 - T2;
+    /*double T1 = _SQRT3 * sin(sector * _PI_3 - elAngle) * Uout;
+    double T2 = _SQRT3 * sin(elAngle - (sector-1.0) * _PI_3) * Uout;
+    double T0 = 1 - T1 - T2;
 
-    /*double Ta,Tb,Tc;
+    double Ta,Tb,Tc;
     switch(sector){
       case 1:
         Ta = T1 + T2 + T0/2;
@@ -108,10 +113,10 @@ void BLDCMotor::SVMGenerator(double alpha, double beta, double &pwma, double &pw
         Ta = 0;
         Tb = 0;
         Tc = 0;
-    }*/
+    }
 
     // calculate the phase voltages and center
-    /*pwma = Ta * (VLim / VDC);
+    pwma = Ta * (VLim / VDC);
     pwmb = Tb * (VLim / VDC);
     pwmc = Tc * (VLim / VDC);*/
 }
@@ -119,6 +124,11 @@ void BLDCMotor::SVMGenerator(double alpha, double beta, double &pwma, double &pw
 
 void BLDCMotor::SetPWM(double pwma, double pwmb, double pwmc)
 {
+	// Limit input pwm to 1
+	pwma > 1.0 ? pwma = 1.0 : pwma < 0.0 ? pwma = 0.0 : pwma = pwma;
+	pwmb > 1.0 ? pwmb = 1.0 : pwmb < 0.0 ? pwmb = 0.0 : pwmb = pwmb;
+	pwmc > 1.0 ? pwmc = 1.0 : pwmc < 0.0 ? pwmc = 0.0 : pwmc = pwmc;
+
 	// Map the PWM to the timer presets
 	double ccra = htim->Instance->ARR * pwma;
 	double ccrb = htim->Instance->ARR * pwmb;
@@ -136,7 +146,41 @@ double BLDCMotor::Mech2Elec(double encoderAngle)
 
 int BLDCMotor::CalcElAngleOffset()
 {
+	float initAngle = 0.0;
+	encoder->GetEncoderAngle(initAngle);
 	// move motor X degrees to one side and to the other
+	for(uint16_t i = 0; i < 500; i++)
+	{
+		elAngle += _2PI * i / 500;
+		double alpha, beta = 0;
+		InverseParkTransform(elAngle, 0.0, 3.0, alpha, beta);
+		double pwma, pwmb, pwmc = 0.0;
+		SVMGenerator(alpha, beta, pwma, pwmb, pwmc);
+		SetPWM(pwma, pwmb, pwmc);
+	}
+	float topAngle = 0.0;
+	encoder->GetEncoderAngle(topAngle);
+
+	for(uint16_t i = 0; i < 1000; i++)
+	{
+		elAngle += _2PI - (2 *_2PI * i / 1000);
+		double alpha, beta = 0;
+		InverseParkTransform(elAngle, 0.0, 3.0, alpha, beta);
+		double pwma, pwmb, pwmc = 0.0;
+		SVMGenerator(alpha, beta, pwma, pwmb, pwmc);
+		SetPWM(pwma, pwmb, pwmc);
+	}
+	float bottomAngle = 0.0;
+	encoder->GetEncoderAngle(bottomAngle);
+
+	if(topAngle > initAngle)
+	{
+		//CCW
+	}
+	else
+	{
+		//CW
+	}
 	int res = 1;
 	return res;
 }
@@ -151,4 +195,23 @@ void BLDCMotor::UpdateElAngle()
 	float encoderAngle = 0.0;
 	encoder->GetEncoderAngle(encoderAngle);
 	elAngle = Mech2Elec(encoderAngle);
+}
+
+void BLDCMotor::FOCLoop()
+{
+	UpdateElAngle();
+
+	double alpha, beta = 0;
+	if(CtlType == BLDCMotor::VOLTAGE)
+	{
+		double VqRef = IqRef * phaseResistance;
+		InverseParkTransform(elAngle, 0.0, VqRef, alpha, beta);
+	}
+	else if(CtlType == BLDCMotor::CURRENT)
+	{
+		InverseParkTransform(elAngle, 0.0, IqRef, alpha, beta);
+	}
+	double pwma, pwmb, pwmc = 0.0;
+	SVMGenerator(alpha, beta, pwma, pwmb, pwmc);
+	SetPWM(pwma, pwmb, pwmc);
 }

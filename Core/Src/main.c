@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,7 +42,6 @@
 I2C_HandleTypeDef hi2c1;
 
 TIM_HandleTypeDef htim1;
-TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim7;
 
@@ -50,7 +50,7 @@ DMA_HandleTypeDef hdma_usart2_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
-serialPort uart2;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,10 +60,8 @@ static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM1_Init(void);
-static void MX_TIM3_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -80,6 +78,7 @@ static void MX_TIM7_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -104,174 +103,21 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_TIM1_Init();
-  MX_TIM3_Init();
   MX_TIM6_Init();
   MX_TIM7_Init();
-
   /* USER CODE BEGIN 2 */
-  uart2.AssignUart(&huart2);
-
-  HAL_Delay(1000);
-  MPU9050 imu(0x68, &hi2c1);
-  AS5048B encoder(0x43, &hi2c1);
-  PID VPID, PPID;
-  BLDCMotor pitchMotor(14, 10.0, &encoder, &htim3);
-
-  if(imu.Init() != 1)
-  {
-	  std::string error_msg("IMU init error.\n");
-	  uart2.Send((uint8_t*) error_msg.c_str(), error_msg.size());
-  }
-  else
-  {
-	  std::string succeed_msg("IMU init succeeded.\n");
-	  uart2.Send((uint8_t*) succeed_msg.c_str(), succeed_msg.size());
-  }
-
-  HAL_Delay(10);
-  if(encoder.Init() != 1)
-  {
-	  std::string error_msg("Encoder init error.\n");
-	  uart2.Send((uint8_t*) error_msg.c_str(), error_msg.size());
-  }
-  else
-  {
-	  std::string succeed_msg("Encoder init succeeded.\n");
-	  uart2.Send((uint8_t*) succeed_msg.c_str(), succeed_msg.size());
-  }
-  // USE TIMER 6 FOR 10Khz TASKS, SUCH AS STABILIZATION
-
-  // USE TIMER 7 FOR 100Hz TASKS, SUCH AS I2C COMMS (ENCODER AND IMU)
-
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-  uint32_t prevTime = HAL_GetTick();
-  uint32_t prevTime_imu = HAL_GetTick();
-  uint32_t prevTime_enc = HAL_GetTick();
-
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  while(uart2.Available())
-	  {
-		  uint8_t buffer_out = 0;
-		  uart2.Read(&buffer_out, 1);
-		  uart2.Send(&buffer_out, 1);
-		  HAL_Delay(1);
-	  }
-
-	  if(HAL_GetTick() - prevTime > 100000)
-	  {
-		  std::string periodic_msg = "This is a periodic 100s message.\n";
-		  uart2.Send((uint8_t*)periodic_msg.c_str(), periodic_msg.size());
-		  prevTime = HAL_GetTick();
-	  }
-
-	  if(HAL_GetTick() - prevTime_imu > 10000)
-	  {
-		  std::string periodic_imu_msg = "IMU data\n";
-		  uart2.Send((uint8_t*)periodic_imu_msg.c_str(), periodic_imu_msg.size());
-
-		  float Ax, Ay, Az, Gx, Gy, Gz = 0;
-		  imu.ReadAccelGyro(Ax, Ay, Az, Gx, Gy, Gz);
-
-		  HAL_Delay(10);
-
-		  std::stringstream acc_msg;
-		  acc_msg << std::fixed << std::setprecision(3);
-		  acc_msg << "X " << Ax << " | Y " << Ay << " | Z " << Az << "\n";
-		  uart2.Send((uint8_t*)acc_msg.str().c_str(), acc_msg.str().size());
-
-		  HAL_Delay(10);
-
-		  std::stringstream gyro_msg;
-		  gyro_msg << std::fixed << std::setprecision(3);
-		  gyro_msg << "X " << Gx << " | Y " << Gy << " | Z " << Gz << "\n";
-		  uart2.Send((uint8_t*)gyro_msg.str().c_str(), gyro_msg.str().size());
-		  prevTime_imu = HAL_GetTick();
-	  }
-
-	  if(HAL_GetTick() - prevTime_enc > 250)
-	  {
-		  std::string periodic_imu_msg = "Encoder data\n";
-		  uart2.Send((uint8_t*)periodic_imu_msg.c_str(), periodic_imu_msg.size());
-
-		  float encoderAngle = 0;
-		  encoder.GetEncoderAngle(encoderAngle);
-
-		  HAL_Delay(10);
-		  std::stringstream enc_msg;
-		  enc_msg << std::fixed << std::setprecision(3);
-		  enc_msg << encoderAngle <<"\n";
-		  uart2.Send((uint8_t*)enc_msg.str().c_str(), enc_msg.str().size());
-
-		  prevTime_enc = HAL_GetTick();
-	  }
   }
   /* USER CODE END 3 */
-}
-
-// CALLBACKS //
-
-void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == USART2)
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == USART2)
-	{
-		uart2.Receive();
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-	}
-}
-
-void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == USART2)
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-}
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == USART2)
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-}
-
-void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef* hi2c)
-{
-	// From which slave
-	switch(hi2c->Devaddress)
-	{
-		case 0x40:
-			//do roll encoder
-			break;
-		case 0x41:
-			//do pitch encoder
-			break;
-		case 0x42:
-			//do yaw encoder
-			break;
-		case 0x43:
-			// -_O_-
-		case 0x68:
-			//do main imu
-			break;
-		case 0x69:
-			//do frame imu
-			break;
-		default:
-			//not implemented
-			break;
-	}
 }
 
 /**
@@ -436,90 +282,6 @@ static void MX_TIM1_Init(void)
 
 }
 
-
-/**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM3_Init(void)
-{
-
-  /* USER CODE BEGIN TIM3_Init 0 */
-
-  /* USER CODE END TIM3_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
-
-  /* USER CODE BEGIN TIM3_Init 1 */
-
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 7637-1;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.RepetitionCounter = 0;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-  sBreakDeadTimeConfig.DeadTime = 0;
-  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-  if (HAL_TIMEx_ConfigBreakDeadTime(&htim3, &sBreakDeadTimeConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM1_Init 2 */
-
-  /* USER CODE END TIM1_Init 2 */
-  HAL_TIM_MspPostInit(&htim3);
-
-}
-
 /**
   * @brief TIM6 Initialization Function
   * @param None
@@ -597,26 +359,6 @@ static void MX_TIM7_Init(void)
 }
 
 /**
-  * Enable DMA controller clock
-  */
-static void MX_DMA_Init(void)
-{
-
-	  /* DMA controller clock enable */
-	  __HAL_RCC_DMA1_CLK_ENABLE();
-
-	  /* DMA interrupt init */
-	  /* DMA1_Stream5_IRQn interrupt configuration */
-	  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
-	  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
-	  /* DMA1_Stream6_IRQn interrupt configuration */
-	  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
-	  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
-
-}
-
-
-/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -643,10 +385,28 @@ static void MX_USART2_UART_Init(void)
   {
     Error_Handler();
   }
-
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+  /* DMA1_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 
 }
 

@@ -49,34 +49,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := CircularBuffer_Test
+BUILD_ARTIFACT_NAME := stm32_gimbalcontroller-master
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-CircularBuffer_Test.elf \
+stm32_gimbalcontroller-master.elf \
 
 MAP_FILES += \
-CircularBuffer_Test.map \
+stm32_gimbalcontroller-master.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-CircularBuffer_Test.list \
+stm32_gimbalcontroller-master.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: CircularBuffer_Test.elf secondary-outputs
+main-build: stm32_gimbalcontroller-master.elf secondary-outputs
 
 # Tool invocations
-CircularBuffer_Test.elf CircularBuffer_Test.map: $(OBJS) $(USER_OBJS) /Users/bernardosantana/Desktop/dev/stm32/CircularBuffer_Test/STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "CircularBuffer_Test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/bernardosantana/Desktop/dev/stm32/CircularBuffer_Test/STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CircularBuffer_Test.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+stm32_gimbalcontroller-master.elf stm32_gimbalcontroller-master.map: $(OBJS) $(USER_OBJS) /Users/bernardosantana/Desktop/dev/stm32/stm32_gimbalcontroller-master/STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-g++ -o "stm32_gimbalcontroller-master.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/bernardosantana/Desktop/dev/stm32/stm32_gimbalcontroller-master/STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32_gimbalcontroller-master.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -85,14 +85,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-CircularBuffer_Test.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "CircularBuffer_Test.list"
+stm32_gimbalcontroller-master.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "stm32_gimbalcontroller-master.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) CircularBuffer_Test.elf CircularBuffer_Test.list CircularBuffer_Test.map default.size.stdout
+	-$(RM) default.size.stdout stm32_gimbalcontroller-master.elf stm32_gimbalcontroller-master.list stm32_gimbalcontroller-master.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
